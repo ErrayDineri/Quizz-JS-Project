@@ -1,0 +1,13 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background-color: #f7f7f7; color: #333; display: flex; justify-content: center; align-items: center; height: 100vh; }
+.container { display: flex; justify-content: center; align-items: center; flex-direction: column; }
+.quiz-card { background-color: #fff; padding: 2rem; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center; }
+.question { font-size: 1.8rem; margin-bottom: 1rem; }
+.choices { display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1rem; }
+.choice-btn { padding: 0.8rem; border: 2px solid #ccc; border-radius: 5px; background-color: #f9f9f9; cursor: pointer; transition: background-color 0.2s; }
+.choice-btn:hover { background-color: #e2e2e2; }
+.choice-btn.correct { background-color: #4CAF50; color: #fff; }
+.choice-btn.incorrect { background-color: #f44336; color: #fff; }
+.status { display: flex; justify-content: space-between; margin-bottom: 1rem; font-weight: 600; }
+.next-btn { padding: 0.8rem 1.5rem; background-color: #4CAF50; color: #fff; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; }
+.next-btn:disabled { background-color: #b3b3b3; cursor: not-allowed; }

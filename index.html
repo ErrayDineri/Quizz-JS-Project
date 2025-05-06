@@ -1,0 +1,24 @@
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jeu de QCM Statique</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="container">
+        <div class="quiz-card">
+            <h1 class="question" id="question">Chargement...</h1>
+            <div class="choices" id="choices"></div>
+            <div class="status">
+                <span id="score">Score: 0</span>
+                <span id="progress">Question 0/25</span>
+            </div>
+            <button id="nextBtn" class="next-btn" disabled>Question suivante</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
