@@ -1,72 +1,181 @@
-const questions = [
-    { question: "Le Soleil est une étoile.", choices: ["Vrai","Faux"], correct: 0 },
-    { question: "La capitale de la France est Paris.", choices: ["Lyon","Marseille","Paris","Nice"], correct: 2 },
-    { question: "L'eau gèle à 0°C.", choices: ["Vrai","Faux"], correct: 0 },
-    { question: "La tour Eiffel se trouve à Rome.", choices: ["Vrai","Faux"], correct: 1 },
-    { question: "Le Python est un langage de programmation.", choices: ["Vrai","Faux"], correct: 0 },
-    { question: "La Terre est plate.", choices: ["Vrai","Faux"], correct: 1 },
-    { question: "2+2 = 4.", choices: ["Vrai","Faux"], correct: 0 },
-    { question: "Le mont Everest est la plus haute montagne du monde.", choices: ["Vrai","Faux"], correct: 0 },
-    { question: "Le diamant est la substance naturelle la plus dure.", choices: ["Vrai","Faux"], correct: 0 },
-    { question: "Le Nil est le fleuve le plus long du monde.", choices: ["Vrai","Faux"], correct: 0 },
-    { question: "L'ADN signifie Acide DésoxyriboNucléique.", choices: ["Vrai","Faux"], correct: 0 },
-    { question: "Le Japon est en Europe.", choices: ["Vrai","Faux"], correct: 1 },
-    { question: "La vitesse de la lumière est d'environ 300 000 km/s.", choices: ["Vrai","Faux"], correct: 0 },
-    { question: "La banane est un légume.", choices: ["Vrai","Faux"], correct: 1 },
-    { question: "Le lion est un mammifère.", choices: ["Vrai","Faux"], correct: 0 },
-    { question: "Les araignées ont six pattes.", choices: ["Vrai","Faux"], correct: 1 },
-    { question: "Le vent est causé par la rotation de la Terre.", choices: ["Vrai","Faux"], correct: 0 },
-    { question: "Shakespeare a écrit 'Hamlet'.", choices: ["Vrai","Faux"], correct: 0 },
-    { question: "Le plutonium est un gaz.", choices: ["Vrai","Faux"], correct: 1 },
-    { question: "Electricité = courant * resistance.", choices: ["Vrai","Faux"], correct: 1 },
-    { question: "L'élément chimique Au est l'or.", choices: ["Vrai","Faux"], correct: 0 },
-    { question: "Les tomates sont des fruits.", choices: ["Vrai","Faux"], correct: 0 },
-    { question: "Le chocolat est fabriqué à partir du cacao.", choices: ["Vrai","Faux"], correct: 0 },
-    { question: "Le Sahara est le plus grand désert chaud.", choices: ["Vrai","Faux"], correct: 0 },
-    { question: "La Russie est le plus grand pays du monde par superficie.", choices: ["Vrai","Faux"], correct: 0 }
-];
+// script.js
+async function fetchQuestions(categoryId, difficulty) {
+    const amount = 10;
+    let apiUrl = `https://opentdb.com/api.php?amount=${amount}&type=multiple`;
+    if (categoryId !== 'all') apiUrl += `&category=${categoryId}`;
+    if (difficulty !== 'all') apiUrl += `&difficulty=${difficulty}`;
 
-let current = 0, score = 0;
+    const res = await fetch(apiUrl);
+    const data = await res.json();
+    if (data.response_code !== 0) throw new Error('Aucune question trouvée.');
+
+    return data.results.map(item => {
+        const decode = txt => {
+            const el = document.createElement('textarea');
+            el.innerHTML = txt;
+            return el.value;
+        };
+
+        // combine and shuffle answers
+        const choices = [...item.incorrect_answers.map(decode), decode(item.correct_answer)];
+        for (let i = choices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [choices[i], choices[j]] = [choices[j], choices[i]];
+        }
+
+        return {
+            q: decode(item.question),
+            c: choices,
+            a: choices.indexOf(decode(item.correct_answer))
+        };
+    });
+}
+
+let questions = [],
+    current = 0,
+    score = 0,
+    timer, timeLeft;
+const maxTime = 15;
+
+// DOM refs
+const setupEl = document.getElementById('setup');
+const quizEl = document.getElementById('quiz');
 const questionEl = document.getElementById('question');
 const choicesEl = document.getElementById('choices');
 const nextBtn = document.getElementById('nextBtn');
-const scoreEl = document.getElementById('score');
-const progressEl = document.getElementById('progress');
+const progressText = document.getElementById('progressText');
+const progressFill = document.getElementById('progressFill');
+const timerFill = document.getElementById('timerFill');
+const lifeline50 = document.getElementById('lifeline50');
+const lifelineSkip = document.getElementById('lifelineSkip');
+const reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
+const reviewList = document.getElementById('reviewList');
+const finalScore = document.getElementById('finalScore');
+const leaderboardEl = document.getElementById('leaderboard');
+const restartBtn = document.getElementById('restartBtn');
+const shareBtn = document.getElementById('shareBtn');
+
+// Start quiz
+document.getElementById('startBtn').onclick = async () => {
+    const cat = document.getElementById('category').value;
+    const diff = document.getElementById('difficulty').value;
+
+    try {
+        questions = await fetchQuestions(cat, diff);
+    } catch (e) {
+        alert(e.message);
+        return;
+    }
+
+    current = 0;
+    score = 0;
+    setupEl.classList.add('d-none');
+    quizEl.classList.remove('d-none');
+    loadQuestion();
+};
 
 function loadQuestion() {
-    const q = questions[current];
-    questionEl.textContent = q.question;
+    clearInterval(timer);
+    timeLeft = maxTime;
+    const obj = questions[current];
+    progressText.textContent = `Question ${current+1}/${questions.length}`;
+    progressFill.style.width = `${(current/questions.length)*100}%`;
+    questionEl.textContent = obj.q;
     choicesEl.innerHTML = '';
-    q.choices.forEach((c, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'choice-btn';
-    btn.textContent = c;
-    btn.onclick = () => select(i, btn);
-    choicesEl.appendChild(btn);
+    obj.c.forEach((opt, i) => {
+        const b = document.createElement('button');
+        b.className = 'btn btn-outline-primary choice-btn';
+        b.textContent = opt;
+        b.onclick = () => select(i, b);
+        choicesEl.appendChild(b);
     });
     nextBtn.disabled = true;
-    progressEl.textContent = `Question ${current+1}/${questions.length}`;
+    lifeline50.disabled = false;
+    lifelineSkip.disabled = false;
+    startTimer();
 }
 
-function select(i, btn) {
-    const q = questions[current];
-    document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
-    if (i === q.correct) { score++; btn.classList.add('correct'); }
-    else { btn.classList.add('incorrect');
-    document.querySelectorAll('.choice-btn')[q.correct].classList.add('correct'); }
-    scoreEl.textContent = `Score: ${score}`;
+function startTimer() {
+    timerFill.style.width = '100%';
+    timer = setInterval(() => {
+        timeLeft--;
+        timerFill.style.width = `${(timeLeft/maxTime)*100}%`;
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            autoNext();
+        }
+    }, 1000);
+}
+
+function select(idx, btn) {
+    clearInterval(timer);
+    Array.from(choicesEl.children).forEach(b => b.disabled = true);
+    const correctIdx = questions[current].a;
+    questions[current].userAns = idx;
+    if (idx === correctIdx) {
+        score++;
+        btn.classList.replace('btn-outline-primary', 'btn-success');
+    } else {
+        btn.classList.replace('btn-outline-primary', 'btn-danger');
+        choicesEl.children[correctIdx].classList.replace('btn-outline-primary', 'btn-success');
+    }
+    nextBtn.disabled = false;
+}
+
+function autoNext() {
+    questions[current].userAns = null;
+    select(-1, document.createElement('div'));
     nextBtn.disabled = false;
 }
 
 nextBtn.onclick = () => {
     current++;
     if (current < questions.length) loadQuestion();
-    else {
-    questionEl.textContent = 'Quiz terminé !';
-    choicesEl.innerHTML = '';
-    nextBtn.style.display = 'none';
-    progressEl.textContent = '';
-    }
+    else showReview();
 };
 
-loadQuestion();
+lifeline50.onclick = () => {
+    const wrongBtns = Array.from(choicesEl.children)
+        .filter((b, i) => i !== questions[current].a && !b.disabled);
+    wrongBtns.sort(() => Math.random() - 0.5)
+        .slice(0, 2).forEach(b => b.disabled = true);
+    lifeline50.disabled = true;
+};
+
+lifelineSkip.onclick = () => {
+    clearInterval(timer);
+    nextBtn.disabled = false;
+    lifelineSkip.disabled = true;
+};
+
+function showReview() {
+    quizEl.classList.add('d-none');
+    finalScore.textContent = `Vous avez obtenu ${score}/${questions.length}`;
+    reviewList.innerHTML = '';
+    questions.forEach((q, i) => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        const user = q.userAns != null ? q.c[q.userAns] : 'Non répondu';
+        li.innerHTML = `<strong>Q${i+1}:</strong> ${q.q}<br><em>Votre réponse:</em> ${user}<br><em>Correcte:</em> ${q.c[q.a]}`;
+        reviewList.appendChild(li);
+    });
+    const board = JSON.parse(localStorage.getItem('leaderboard') || '[]');
+    board.push({
+        date: new Date().toLocaleDateString(),
+        score
+    });
+    board.sort((a, b) => b.score - a.score);
+    const top5 = board.slice(0, 5);
+    localStorage.setItem('leaderboard', JSON.stringify(top5));
+    leaderboardEl.innerHTML = '';
+    top5.forEach(entry => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.textContent = `${entry.date} — ${entry.score}/${questions.length}`;
+        leaderboardEl.appendChild(li);
+    });
+    reviewModal.show();
+}
+
+restartBtn.onclick = () => location.reload();
+shareBtn.onclick = () => navigator.clipboard.writeText(`J'ai fait ${score}/${questions.length} au quiz !`);
