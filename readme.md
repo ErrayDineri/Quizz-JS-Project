@@ -15,7 +15,8 @@ An interactive, modern, and responsive quiz application built with **HTML**, **C
 
 ## 📷 Demo
 
-[![✨ Try the demo](https://img.shields.io/badge/Demo-Click%20Here-blue?style=for-the-badge&logo=appveyor)](demo.mp4)
+[![✨ Try the demo](https://img.shields.io/badge/Demo-Click%20Here-blue?style=for-the-badge&logo=appveyor)](https://streamable.com/js5qo5)
+
 
 ## 🛠️ Technologies Used
 
