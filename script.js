@@ -1,6 +1,5 @@
 // script.js
-async function fetchQuestions(categoryId, difficulty) {
-    const amount = 10;
+async function fetchQuestions(categoryId, difficulty, amount) {
     let apiUrl = `https://opentdb.com/api.php?amount=${amount}&type=multiple`;
     if (categoryId !== 'all') apiUrl += `&category=${categoryId}`;
     if (difficulty !== 'all') apiUrl += `&difficulty=${difficulty}`;
@@ -59,9 +58,10 @@ const shareBtn = document.getElementById('shareBtn');
 document.getElementById('startBtn').onclick = async () => {
     const cat = document.getElementById('category').value;
     const diff = document.getElementById('difficulty').value;
+    const amount = document.getElementById('questionNumber').value;
 
     try {
-        questions = await fetchQuestions(cat, diff);
+        questions = await fetchQuestions(cat, diff, amount);
     } catch (e) {
         alert(e.message);
         return;
@@ -155,8 +155,8 @@ function showReview() {
     questions.forEach((q, i) => {
         const li = document.createElement('li');
         li.className = 'list-group-item';
-        const user = q.userAns != null ? q.c[q.userAns] : 'Non répondu';
-        li.innerHTML = `<strong>Q${i+1}:</strong> ${q.q}<br><em>Votre réponse:</em> ${user}<br><em>Correcte:</em> ${q.c[q.a]}`;
+        const user = q.userAns != null ? q.c[q.userAns] : 'Didn\'t answer';
+        li.innerHTML = `<strong>Q${i+1}:</strong> ${q.q}<br><em>Your answer:</em> ${user}<br><em>Correct:</em> ${q.c[q.a]}`;
         reviewList.appendChild(li);
     });
     const board = JSON.parse(localStorage.getItem('leaderboard') || '[]');
@@ -178,4 +178,19 @@ function showReview() {
 }
 
 restartBtn.onclick = () => location.reload();
-shareBtn.onclick = () => navigator.clipboard.writeText(`J'ai fait ${score}/${questions.length} au quiz !`);
+// Grab the toast element & Bootstrap instance
+const copyToastEl = document.getElementById('copyToast');
+const copyToast = new bootstrap.Toast(copyToastEl);
+
+shareBtn.onclick = () => {
+    const text = `I did ${score}/${questions.length} in the quizz !`;
+    navigator.clipboard.writeText(text)
+        .then(() => {
+            // Show the toast
+            copyToast.show();
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Failed to copy text.");
+        });
+};
