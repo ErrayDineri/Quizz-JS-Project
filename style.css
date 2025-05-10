@@ -1,89 +1,139 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* Root theme colors */
+:root {
+    --primary: #4a90e2;
+    --secondary: #50e3c2;
+    --accent: #f5a623;
+    --bg-gradient-start: #1f1f2e;
+    --bg-gradient-end: #3b3b4f;
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --text-color: #2c2c3a;
+    --timer-color: #e94e77;
 }
 
+/* Fullscreen gradient background */
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: #f7f7f7;
-    color: #333;
+    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    color: var(--text-color);
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
     display: flex;
-    justify-content: center;
     align-items: center;
-    height: 100vh;
+    justify-content: center;
 }
 
-.container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
-
+/* Quiz card with glassmorphism effect */
 .quiz-card {
-    background-color: #fff;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: none;
+    border-radius: 1rem;
+    max-width: 650px;
     width: 100%;
-    max-width: 600px;
-    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
-.question {
-    font-size: 1.8rem;
-    margin-bottom: 1rem;
+.card-body {
+    padding: 2rem;
 }
 
-.choices {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-    margin-bottom: 1rem;
+/* Question emoji */
+#question::before {
+    content: "❓ ";
+    font-size: 1.5rem;
 }
 
+/* Choice buttons styling */
 .choice-btn {
-    padding: 0.8rem;
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    border: 2px solid var(--primary);
+    background: rgba(255, 255, 255, 0.7);
+    color: var(--text-color);
+    font-weight: 500;
+    transition: background 0.3s, transform 0.2s;
 }
 
 .choice-btn:hover {
-    background-color: #e2e2e2;
+    background: var(--primary);
+    color: #fff;
+    transform: translateY(-2px);
 }
 
 .choice-btn.correct {
-    background-color: #4CAF50;
+    background: var(--secondary) !important;
     color: #fff;
+}
+
+.choice-btn.correct::after {
+    content: " ✔️";
 }
 
 .choice-btn.incorrect {
-    background-color: #f44336;
+    background: var(--timer-color) !important;
     color: #fff;
 }
 
-.status {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 1rem;
+.choice-btn.incorrect::after {
+    content: " ❌";
+}
+
+/* Progress bars */
+.progress {
+    height: 1rem;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.progress-bar {
+    transition: width 0.4s ease;
+}
+
+#timerFill {
+    background: var(--timer-color);
+}
+
+/* Buttons */
+.btn-primary {
+    background: var(--primary);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    transition: background 0.3s;
+}
+
+.btn-primary:hover {
+    background: var(--secondary);
+}
+
+.btn-success,
+.btn-warning,
+.btn-secondary {
+    border-radius: 0.75rem;
+}
+
+/* Toast customization */
+.toast {
+    border-radius: 0.75rem;
+}
+
+/* Typography */
+h3,
+h4,
+.card-title {
+    font-family: 'Poppins', sans-serif;
     font-weight: 600;
 }
 
-.next-btn {
-    padding: 0.8rem 1.5rem;
-    background-color: #4CAF50;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
-    cursor: pointer;
-}
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .quiz-card {
+        margin: 1rem;
+    }
 
-.next-btn:disabled {
-    background-color: #b3b3b3;
-    cursor: not-allowed;
+    .choice-btn {
+        font-size: 0.9rem;
+    }
 }
